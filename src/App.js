@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import 'antd/dist/antd.css';
 import { Icon, Rate, Tabs } from 'antd';
 const TabPane = Tabs.TabPane;
 
