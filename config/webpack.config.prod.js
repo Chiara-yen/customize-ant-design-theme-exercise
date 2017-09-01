@@ -13,6 +13,12 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 
+// following three lines is for customized ant design theme variables
+// reference from: https://medium.com/@GeoffMiller/how-to-customize-ant-design-with-react-webpack-the-missing-guide-c6430f2db10f
+const fs = require('fs');
+const lessToJs = require('less-vars-to-js');
+const themeVariables = lessToJs(fs.readFileSync(path.join(__dirname, '../src/customized-antd-vars.less'), 'utf8'));
+
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
 const publicPath = paths.servedPath;
@@ -90,7 +96,7 @@ module.exports = {
     // for React Native Web.
     extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
     alias: {
-      
+
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
@@ -121,7 +127,7 @@ module.exports = {
             options: {
               formatter: eslintFormatter,
               eslintPath: require.resolve('eslint'),
-              
+
             },
             loader: require.resolve('eslint-loader'),
           },
@@ -149,8 +155,10 @@ module.exports = {
             include: paths.appSrc,
             loader: require.resolve('babel-loader'),
             options: {
-              
               compact: true,
+              plugins: [
+                ['import', { libraryName: "antd", style: true }]
+              ]
             },
           },
           // The notation here is somewhat confusing.
@@ -206,6 +214,25 @@ module.exports = {
               )
             ),
             // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+          },
+          {
+            test: /\.less$/,
+            use: [
+              require.resolve('style-loader'),
+              {
+                loader: require.resolve('css-loader'),
+                options: {
+                  importLoaders: 1,
+                },
+              },
+              {
+                loader: require.resolve('less-loader'),
+                options: {
+                  importLoaders: 1,
+                  modifyVars: themeVariables
+                },
+              },
+            ],
           },
           // "file" loader makes sure assets end up in the `build` folder.
           // When you `import` an asset, you get its filename.
